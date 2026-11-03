@@ -1817,6 +1817,8 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
            .filter(seg => seg && seg !== '.' && seg !== '..').join('/');
       if (!k) k = 'Unbenannt_' + Date.now() + '.md';
       if (!/\.[a-z0-9]{1,5}$/i.test(k.split('/').pop())) k += '.md';
+      // "knowledge/x.md", "Knowledge/x.md", "vega/Knowledge/x.md" -> immer Vega/knowledge/x.md (nie Breachpoint/Knowledge)
+      k = k.replace(/^(?:(?:vega|ai_core)\/)?knowledge\//i, KNOWLEDGE_PREFIX);
       if (!k.includes('/')) k = KNOWLEDGE_PREFIX + k;
       return k;
     }
@@ -1960,7 +1962,7 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
       if (top === 'copilot' || top === 'node_modules') return true;
       const name = segs[segs.length - 1];
       if (/\.gs\.txt$/i.test(name) || name.toLowerCase() === 'desktop.ini') return true;
-      if (top === 'ai_core') {
+      if (top === 'ai_core' || top === 'vega') {
         if (segs.length <= 2) return true; // Dateien direkt in Vega (config.json, Alt-Gedächtnis, Starter)
         const sub = segs[1].toLowerCase();
         if (['app', 'appbu', 'native_app', 'native_appbu', 'memory', 'threads', 'output'].includes(sub)) return true;
@@ -2087,7 +2089,7 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
         }
         if (isExcludedKnowledgePath(knowledgeDisplayPath(k))) { delete dirtyKnowledge[k]; continue; }
         const isDirty = !!dirtyKnowledge[k];
-        if (!isDirty && isOnDisk(k)) continue;         // liegt auf Platte, wird nur nicht gelesen (z. B. zu groß)
+        if (!isDirty) continue;                        // nicht auf Platte und nicht ungespeichert -> gelöscht, nicht wiederbeleben
         const norm = knowledgeDisplayPath(k);
         if (lowerTaken.has(norm.toLowerCase()) && !isDirty) continue;   // Dublette (z. B. "x.md" vs. "Vega/knowledge/x.md")
         if (lowerTaken.has(k.toLowerCase()) && !isDirty) continue;
@@ -2122,7 +2124,7 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
       for (const oldKey of Object.keys(state.knowledgeFiles)) {
         const isDirty = !!dirtyKnowledge[oldKey];
         const fromDisk = diskKnowledgeLoaded && isOnDisk(oldKey);
-        if (!isDirty && (fromDisk || !diskKnowledgeLoaded)) continue;
+        if (!isDirty) continue;                        // nur echte ungespeicherte Änderungen schreiben (gelöschte Dateien nie neu anlegen)
         const key = toKnowledgeKey(oldKey);
         if (key !== oldKey) {
           if (!Object.prototype.hasOwnProperty.call(state.knowledgeFiles, key)) state.knowledgeFiles[key] = state.knowledgeFiles[oldKey];
@@ -2959,6 +2961,7 @@ ${crossThreadContext}${driveIndexBlock}
 - Ins Journal schreiben: <tool name="write_journal" title="Titel">Text...</tool>
 - Bild/Avatar generieren: <tool name="generate_image" target="avatar">English image prompt</tool> (oder target="chat")
 - Datei anlegen: <tool name="create_document" filename="datei.md">Inhalt...</tool> (Ordner relativ zum Breachpoint-Hauptordner möglich, z. B. filename="WIP- Projekte/notiz.md"; ohne Ordner landet sie in Vega/knowledge/)
+- Wissensdateien gehören IMMER nach Vega/knowledge/ (z. B. filename="Vega/knowledge/Thema/notiz.md"), nie in einen Ordner "Knowledge" im Breachpoint-Hauptordner.
 `;
     }
 
