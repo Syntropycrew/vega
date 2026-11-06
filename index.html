@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Vega // Breachpoint</title>
+  <!-- vega-pwa shell v2 -->
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
@@ -338,7 +339,22 @@
 
     .input-area { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg-panel); }
     .input-box-wrap { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
-    .quick-actions { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+    /* Mobile-first: ein Dropdown. Ab ~900px die bisherigen Chips (falls dieselbe Seite am Desktop mitläuft). */
+    .quick-actions { display: none; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+    .quick-select-wrap { display: block; }
+    .quick-select {
+      width: 100%;
+      min-height: 44px;
+      font-size: 16px;
+      font-family: inherit;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .quick-select:focus { outline: none; border-color: var(--accent); }
     .chip {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -346,11 +362,17 @@
       padding: 4px 10px;
       border-radius: 99px;
       font-size: 0.74rem;
+      font-family: inherit;
       white-space: nowrap;
       cursor: pointer;
       transition: all 0.15s;
+      appearance: none;
     }
     .chip:hover { color: #fff; border-color: var(--accent); background: var(--accent-dim); }
+    @media (min-width: 900px) {
+      .quick-select-wrap { display: none; }
+      .quick-actions { display: flex; }
+    }
     .input-row { display: flex; gap: 10px; align-items: flex-end; }
     textarea#chat-input {
       flex: 1;
@@ -595,6 +617,94 @@
       .key-input-group { flex-direction: column; }
       .file-list button, .file-list .btn { min-width: 36px; min-height: 36px; }
     }
+
+    /* Nachrichten-Aktionen: auf schmal nur Kopieren + ⋯. Ab 900px die einzelnen Knöpfe. */
+    .msg-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .msg-act {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    .msg-act:hover { border-color: var(--accent); }
+    .msg-more-btn { font-size: 1.25rem; letter-spacing: 0.08em; padding-inline: 16px; }
+    .msg-wide-actions { display: none; gap: 6px; flex-wrap: wrap; }
+    .msg-act.danger { border-color: rgba(239,68,68,0.55); color: #fecaca; }
+    @media (min-width: 900px) {
+      .msg-more-btn { display: none; }
+      .msg-wide-actions { display: flex; }
+      .msg-act { min-height: 32px; min-width: 0; padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; }
+    }
+
+    /* Bottom-Sheet: Freigabe von Schreibaktionen und das ⋯-Menü */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 220;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .sheet-backdrop[hidden] { display: none !important; }
+    .sheet {
+      width: min(560px, 100%);
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 16px 16px 0 0;
+      padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
+      box-shadow: 0 -10px 36px rgba(0,0,0,0.5);
+      max-height: 85dvh;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sheet h3 { font-size: 1.05rem; color: #fff; }
+    .sheet p, .sheet li { font-size: 0.92rem; color: var(--text-main); }
+    .sheet ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .sheet li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .sheet-preview {
+      margin-top: 6px;
+      max-height: 96px;
+      overflow: auto;
+      white-space: pre-wrap;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .sheet-btn {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .sheet-btn.primary { background: rgba(0, 229, 255, 0.16); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .sheet-btn.danger { margin-top: 8px; background: rgba(239, 68, 68, 0.14); border-color: var(--danger); color: #fecaca; }
+    .sheet-actions { display: flex; flex-direction: column; gap: 8px; }
+    @media (min-width: 900px) {
+      .sheet-backdrop { align-items: center; padding: 16px; }
+      .sheet { border-radius: 16px; border-bottom: 1px solid var(--border); }
+    }
   </style>
 </head>
 <body>
@@ -739,11 +849,32 @@
 
     <div class="input-area">
       <div class="input-box-wrap">
+        <div class="quick-select-wrap">
+          <select id="quick-select" class="quick-select" aria-label="Schnellfunktion" onchange="onQuickActionSelect(this)">
+            <option value="">Schnellfunktion wählen …</option>
+            <option value="weiterdenken">Weiterdenken</option>
+            <option value="zusammenfassen">Zusammenfassen</option>
+            <option value="klaeren">Klären</option>
+            <option value="kritik">Kritik</option>
+            <option value="axiome">Axiome prüfen</option>
+            <option value="journal">Journal schreiben</option>
+            <option value="ideenbox">Idee in Ideenbox</option>
+            <option value="gedaechtnis">Gedächtnis aktualisieren</option>
+            <option value="thema">Thema vorschlagen</option>
+            <option value="bild">Bild generieren</option>
+          </select>
+        </div>
         <div class="quick-actions" id="quick-actions-bar">
-          <span class="chip" onclick="insertPrompt('Bitte fasse die wichtigsten neuen Erkenntnisse unseres aktuellen Gesprächs zusammen und trage sie mit dem Werkzeug update_memory in dein Langzeitgedächtnis (01_MEMORY_LEDGER.md) ein.')">🧠 Gedächtnis aktualisieren</span>
-          <span class="chip" onclick="insertPrompt('Bitte reflektiere unser aktuelles Gespräch und halte deine eigenen Gedanken und Thesen mit dem Werkzeug write_journal in deinem autonomen Journal (02_EVOLUTION_JOURNAL.md) fest.')">📓 Journal schreiben</span>
-          <span class="chip" onclick="insertPrompt('Schlage mir aus deiner eigenen Neugier und unserem bisherigen Gedächtnis heraus ein spannendes Thema, ein Paradoxon oder eine Kausalitätskette vor, die wir als Nächstes vertiefen sollten.')">💡 Thema vorschlagen</span>
-          <span class="chip" onclick="insertPrompt('Generiere bitte mit dem Werkzeug generate_image (target=&quot;chat&quot;) ein Bild zu folgender Vorstellung: ')">🎨 Bild generieren</span>
+          <button type="button" class="chip" onclick="applyQuickAction('weiterdenken')">Weiterdenken</button>
+          <button type="button" class="chip" onclick="applyQuickAction('zusammenfassen')">Zusammenfassen</button>
+          <button type="button" class="chip" onclick="applyQuickAction('klaeren')">Klären</button>
+          <button type="button" class="chip" onclick="applyQuickAction('kritik')">Kritik</button>
+          <button type="button" class="chip" onclick="applyQuickAction('axiome')">Axiome prüfen</button>
+          <button type="button" class="chip" onclick="applyQuickAction('journal')">📓 Journal schreiben</button>
+          <button type="button" class="chip" onclick="applyQuickAction('ideenbox')">💡 Idee in Ideenbox</button>
+          <button type="button" class="chip" onclick="applyQuickAction('gedaechtnis')">🧠 Gedächtnis aktualisieren</button>
+          <button type="button" class="chip" onclick="applyQuickAction('thema')">💡 Thema vorschlagen</button>
+          <button type="button" class="chip" onclick="applyQuickAction('bild')">🎨 Bild generieren</button>
         </div>
 
         <!-- Vorschau für angehängte Bilder & Dateien vor dem Senden -->
@@ -824,6 +955,26 @@
     </div>
   </div>
 
+  <div id="write-approval" class="sheet-backdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="write-approval-title">
+      <h3 id="write-approval-title">Freigabe</h3>
+      <p>Vega möchte schreiben. Ohne Freigabe bleibt Gedächtnis, Journal und Dateien unverändert.</p>
+      <ul id="write-approval-list"></ul>
+      <div class="sheet-actions">
+        <button type="button" class="sheet-btn primary" id="write-approve">Freigeben und schreiben</button>
+        <button type="button" class="sheet-btn" id="write-reject">Nicht schreiben</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="msg-action-sheet" class="sheet-backdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="msg-action-title">
+      <h3 id="msg-action-title">Nachricht</h3>
+      <div id="msg-action-buttons" class="sheet-actions"></div>
+      <button type="button" class="sheet-btn" onclick="closeMsgActionSheet()">Schließen</button>
+    </div>
+  </div>
+
   <script>
   // ============================================================================
   // VEGA SPEICHER-WEICHE: Desktop (Vega.exe) ODER Google Drive im Browser
@@ -845,7 +996,7 @@
     const TOKEN_KEY = 'vega_gdrive_token';
     const MAX_DEPTH = 10, MAX_FULL_TEXT_BYTES = 500000, TRUNC_CHARS = 200000, MAX_ZIPDOC = 25 * 1024 * 1024, MAX_SERVE = 50 * 1024 * 1024;
     const MAX_TOTAL_CHARS = 8 * 1000 * 1000;   // mobil kleiner als am PC (40 Mio.)
-    const EXCL_TOP = ['copilot'], EXCL_ANY = ['node_modules', '__pycache__', 'venv'], EXCL_CORE = [];
+    const EXCL_TOP = ['copilot'], EXCL_ANY = ['node_modules', '__pycache__', 'venv'], EXCL_CORE = ['app', 'appbu', 'native_app', 'native_appbu', 'memory', 'threads', 'output'];
     const TEXT_EXT = ['.md','.markdown','.txt','.text','.json','.jsonl','.csv','.tsv','.xml','.yaml','.yml','.ini','.cfg','.conf','.toml','.env.example','.html','.htm','.css','.scss','.js','.mjs','.cjs','.ts','.tsx','.jsx','.py','.cs','.gd','.tscn','.tres','.godot','.gdshader','.shader','.java','.kt','.c','.cpp','.cc','.h','.hpp','.rs','.go','.rb','.php','.lua','.sh','.bash','.bat','.cmd','.ps1','.psm1','.sql','.log','.srt','.vtt','.tex','.bib','.org','.adoc','.rst','.svg','.gitignore','.properties','.m3u','.nfo'];
     const ZIPDOC_EXT = ['.docx','.xlsx','.pptx','.odt','.ods','.odp','.epub'];
     const MEDIA_MIME = { '.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.gif':'image/gif','.bmp':'image/bmp','.heic':'image/heic','.heif':'image/heif','.pdf':'application/pdf','.mp3':'audio/mpeg','.wav':'audio/wav','.m4a':'audio/mp4','.aac':'audio/aac','.ogg':'audio/ogg','.flac':'audio/flac','.mp4':'video/mp4','.mov':'video/quicktime','.webm':'video/webm','.mkv':'video/x-matroska','.avi':'video/x-msvideo','.mpeg':'video/mpeg' };
@@ -862,12 +1013,14 @@
     const extOf = name => { const n = lower(name); if (n.endsWith('.env.example')) return '.env.example'; const i = n.lastIndexOf('.'); return i > 0 || (i === 0 && n.length > 1) ? n.slice(i) : ''; };
     const eq = (a, b) => lower(a) === lower(b);
 
+    function isCoreFolderName(seg) { return eq(seg, VEGA_CORE_NAME) || eq(seg, 'ai_core'); }
     function isExcludedDir(relDir) {
       const segs = relDir.split('/').filter(Boolean);
       if (!segs.length) return false;
       for (const s of segs) { if (s.startsWith('.')) return true; if (EXCL_ANY.some(x => eq(x, s))) return true; }
       if (EXCL_TOP.some(x => eq(x, segs[0]))) return true;
-      if (eq(segs[0], VEGA_CORE_NAME) && segs.length >= 2) {
+      // memory/ und app/ gehören nicht ins Wissens-Import — unter Vega und unter dem alten Ordnernamen ai_core
+      if (isCoreFolderName(segs[0]) && segs.length >= 2) {
         if (EXCL_CORE.some(x => eq(x, segs[1]))) return true;
         for (let i = 1; i < segs.length; i++) if (segs[i].includes('BU')) return true;
         if (segs.length >= 3 && eq(segs[1], 'knowledge') && eq(segs[2], '_cache')) return true;
@@ -879,7 +1032,7 @@
       if (name.startsWith('.') || name.startsWith('~$')) return true;
       if (dir && isExcludedDir(dir)) return true;
       if (lower(name).endsWith('.gs.txt') || eq(name, 'desktop.ini')) return true;
-      if (eq(dir, VEGA_CORE_NAME)) return true;
+      if (isCoreFolderName(dir)) return true;
       return false;
     }
     function resolveKnowledgeRel(key) {
@@ -2140,7 +2293,12 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
       persistDirtyKnowledge();
       const total = Object.keys(files).length;
       if (total === 0) return { ok: true, errors: [], written: [], skipped: [] };
-      if (!isNativeBridgeAvailable) return { ok: false, errors: ['Desktop-Brücke (Vega.exe) nicht verbunden'], written: [], skipped: [] };
+      if (!isNativeBridgeAvailable) {
+        const hint = (typeof VegaDrive !== 'undefined' && VegaDrive.active)
+          ? 'Google Drive ist nicht verbunden — bitte „Mit Google verbinden“'
+          : 'Desktop-Brücke (Vega.exe) nicht verbunden';
+        return { ok: false, errors: [hint], written: [], skipped: [] };
+      }
 
       try {
         const res = await fetch('/api/disk/save-knowledge', {
@@ -2187,18 +2345,8 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
       document.getElementById('input-gemini-key').value = state.geminiKey;
       document.getElementById('input-groq-key').value = state.groqKey;
 
-      if (state.groqKey && state.selectedModel.startsWith('pollinations::')) {
-        state.selectedModel = 'groq::llama-3.3-70b-versatile';
-      } else if (state.openrouterKey && state.selectedModel.startsWith('pollinations::')) {
-        state.selectedModel = 'openrouter::openrouter/free';
-      }
-
-      const modelSelect = document.getElementById('model-select');
-      if ([...modelSelect.options].some(o => o.value === state.selectedModel)) {
-        modelSelect.value = state.selectedModel;
-      } else {
-        state.selectedModel = modelSelect.options[0].value;
-      }
+      // Gewähltes Modell bleibt. Kein stilles Umschalten auf Groq/OpenRouter/erstes Listenmodell.
+      stickSelectedModel();
 
       updateIdentityUI();
       renderKnowledgeList();
@@ -2277,7 +2425,6 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
             return score(b) - score(a);
           });
           cachedGroqModelIds = models;
-          const sel = document.getElementById('model-select');
           const groqGroup = document.getElementById('groq-optgroup');
           if (groqGroup) {
             groqGroup.innerHTML = '';
@@ -2287,15 +2434,7 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
               opt.textContent = `${mod} (Groq)`;
               groqGroup.appendChild(opt);
             }
-            if (state.selectedModel.startsWith('groq::')) {
-              if ([...sel.options].some(o => o.value === state.selectedModel)) {
-                sel.value = state.selectedModel;
-              } else {
-                state.selectedModel = `groq::${models[0]}`;
-                sel.value = state.selectedModel;
-                saveState();
-              }
-            }
+            stickSelectedModel();
           }
         }
       } catch (e) {}
@@ -2328,7 +2467,6 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
             ...availableModels.filter(m => !preferredOrder.includes(m))
           ];
           cachedGeminiModelIds = sortedModels;
-          const sel = document.getElementById('model-select');
           const geminiGroup = document.getElementById('gemini-optgroup');
           if (geminiGroup) {
             geminiGroup.innerHTML = '';
@@ -2338,15 +2476,7 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
               opt.textContent = `${mod} (Google)`;
               geminiGroup.appendChild(opt);
             }
-            if (state.selectedModel.startsWith('gemini::')) {
-              if ([...sel.options].some(o => o.value === state.selectedModel)) {
-                sel.value = state.selectedModel;
-              } else {
-                state.selectedModel = `gemini::${sortedModels[0]}`;
-                sel.value = state.selectedModel;
-                saveState();
-              }
-            }
+            stickSelectedModel();
           }
         }
       } catch (e) {}
@@ -2367,14 +2497,22 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
             opt.textContent = `${m.name || m.id} (via OpenRouter)`;
             optgroup.appendChild(opt);
           }
-          if (state.selectedModel.startsWith('openrouter::')) {
-            const sel = document.getElementById('model-select');
-            if ([...sel.options].some(o => o.value === state.selectedModel)) {
-              sel.value = state.selectedModel;
-            }
-          }
+          stickSelectedModel();
         }
       } catch (e) {}
+    }
+
+    function stickSelectedModel() {
+      const sel = document.getElementById('model-select');
+      if (!sel || !state.selectedModel) return;
+      if (![...sel.options].some(o => o.value === state.selectedModel)) {
+        const opt = document.createElement('option');
+        opt.value = state.selectedModel;
+        const name = state.selectedModel.includes('::') ? state.selectedModel.split('::').slice(1).join('::') : state.selectedModel;
+        opt.textContent = name + ' (bleibt gewählt)';
+        sel.appendChild(opt);
+      }
+      sel.value = state.selectedModel;
     }
 
     function addWelcomeMessage() {
@@ -2580,9 +2718,7 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
 
       if (rootDirHandle) {
         try {
-          let aiCoreHandle = rootDirHandle.name.toLowerCase() === 'ai_core'
-            ? rootDirHandle
-            : await rootDirHandle.getDirectoryHandle('Vega', { create: true });
+          let aiCoreHandle = await getVegaDirHandle(rootDirHandle);
           const outHandle = await aiCoreHandle.getDirectoryHandle('output', { create: true });
           await writeDiskFile(outHandle, safeFileName, md);
         } catch (e) {}
@@ -2636,8 +2772,9 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
       }
       try {
         const pickedHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-        if (pickedHandle.name.toLowerCase() === 'ai_core' || pickedHandle.name.toLowerCase() === 'memory') {
-          alert('💡 Wichtiger Hinweis: Du hast gerade den Unterordner „' + pickedHandle.name + '“ ausgewählt.\n\nWenn Vega auf ganz „Breachpoint“ (inklusive Syntropic Society) zugreifen soll, klicke bitte gleich noch einmal auf „Ordner wechseln“ und wähle eine Ebene höher den Hauptordner „Breachpoint“ aus!');
+        const pickedLow = pickedHandle.name.toLowerCase();
+        if (pickedLow === 'ai_core' || pickedLow === 'vega' || pickedLow === 'memory') {
+          alert('💡 Du hast den Unterordner „' + pickedHandle.name + '“ gewählt.\n\nVega liest das Projekt aus dem Hauptordner „Breachpoint“. Darin liegt der Ordner „Vega“. Bitte eine Ebene höher „Breachpoint“ wählen.');
         }
         rootDirHandle = pickedHandle;
         document.getElementById('sync-status-label').textContent = '● Gekoppelt mit: ' + rootDirHandle.name;
@@ -2666,14 +2803,14 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
             if (entry.name.startsWith('.') || entry.name.toLowerCase() === 'node_modules') continue;
             if (/GOOGLE_DRIVE_EXOCORTEX_BRIDGE|\.gs\.txt$/i.test(entry.name)) continue;
             const relPath = relativePrefix ? `${relativePrefix}/${entry.name}` : entry.name;
-            if (relPath.toLowerCase() === 'ai_core/app') continue;
+            if (isPrivateCoreRel(relPath)) continue;
 
             if (entry.kind === 'directory') {
               treeEntries.push(`📁 ${relPath}/`);
               await scanDir(entry, relPath, depth + 1);
             } else if (entry.kind === 'file') {
               treeEntries.push(`📄 ${relPath}`);
-              if (/\.(md|txt|json|csv)$/i.test(entry.name) && !relPath.toLowerCase().startsWith('ai_core/memory/')) {
+              if (/\.(md|txt|json|csv)$/i.test(entry.name) && !isPrivateCoreRel(relPath)) {
                 try {
                   const f = await entry.getFile();
                   if (f.size < 300000) {
@@ -2731,9 +2868,7 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
         return;
       }
       try {
-        let aiCoreHandle = rootDirHandle.name.toLowerCase() === 'ai_core'
-          ? rootDirHandle
-          : await rootDirHandle.getDirectoryHandle('Vega', { create: true });
+        let aiCoreHandle = await getVegaDirHandle(rootDirHandle);
         const memHandle = await aiCoreHandle.getDirectoryHandle('memory', { create: true });
 
         for (const [key, filename] of [
@@ -2859,9 +2994,7 @@ Die Analyse von Captain Merkurs Hauptwerk (*Syntropic Society* / *Technokratisch
 
       if (rootDirHandle) {
         try {
-          let aiCoreHandle = rootDirHandle.name.toLowerCase() === 'ai_core'
-            ? rootDirHandle
-            : await rootDirHandle.getDirectoryHandle('Vega', { create: true });
+          let aiCoreHandle = await getVegaDirHandle(rootDirHandle);
           const memHandle = await aiCoreHandle.getDirectoryHandle('memory', { create: true });
 
           await writeDiskFile(memHandle, '00_CORE_AXIOMS.md', state.axioms);
@@ -2957,22 +3090,132 @@ ${state.ledger.slice(-1400)}
 ${crossThreadContext}${driveIndexBlock}
 # OPTIONALE WERKZEUGE (nur nutzen, wenn sinnvoll)
 - Identität ändern: <tool name="set_identity" entity_name="Name" role="Rolle" mood="Stimmung" />
-- Langzeitgedächtnis ergänzen: <tool name="update_memory">- Eintrag...</tool>
-- Ins Journal schreiben: <tool name="write_journal" title="Titel">Text...</tool>
+- Langzeitgedächtnis ergänzen: <tool name="update_memory">- Eintrag...</tool> (hängt an memory/01_MEMORY_LEDGER.md an)
+- Ins Journal schreiben: <tool name="write_journal" title="Titel">nur der neue Eintrag</tool> (landet in memory/02_JOURNAL.md, nicht in 02_EVOLUTION_JOURNAL.md; nicht die ganze Datei wiederholen)
 - Bild/Avatar generieren: <tool name="generate_image" target="avatar">English image prompt</tool> (oder target="chat")
 - Datei anlegen: <tool name="create_document" filename="datei.md">Inhalt...</tool> (Ordner relativ zum Breachpoint-Hauptordner möglich, z. B. filename="WIP- Projekte/notiz.md"; ohne Ordner landet sie in Vega/knowledge/)
+- Datei fortschreiben: <tool name="update_document" filename="Vega/knowledge/…/datei.md">VOLLSTÄNDIGER neuer Dateiinhalt</tool>
+  Bei update_document zuerst den gesamten bisherigen Inhalt wörtlich übernehmen, dann den neuen Abschnitt anhängen. Nichts kürzen, nichts umschreiben. Die Ideenbox ist genau Vega/knowledge/Vega-Core/Arbeitsplatz/Ideenbox.md.
 - Wissensdateien gehören IMMER nach Vega/knowledge/ (z. B. filename="Vega/knowledge/Thema/notiz.md"), nie in einen Ordner "Knowledge" im Breachpoint-Hauptordner.
 `;
+    }
+
+    function toolAttr(attrs, name) {
+      const m = new RegExp(name + '=["\']([^"\']+)["\']', 'i').exec(attrs || '');
+      return m ? m[1].trim() : '';
+    }
+
+    function stripToolMatches(text, matches) {
+      let out = text;
+      for (const m of matches) out = out.split(m[0]).join('');
+      return out;
+    }
+
+    function lookupKnowledge(filename) {
+      const key = toKnowledgeKey(filename);
+      const files = state.knowledgeFiles || {};
+      if (Object.prototype.hasOwnProperty.call(files, key)) return { key, text: String(files[key] ?? '') };
+      const lower = key.toLowerCase();
+      for (const k of Object.keys(files)) {
+        if (k.toLowerCase() === lower) return { key: k, text: String(files[k] ?? '') };
+      }
+      return { key, text: '' };
+    }
+
+    // true, wenn der Modelltext den Anfang der bestehenden Datei schon enthält (voller Ersatz).
+    function incomingContainsOldHead(oldText, incoming) {
+      const old = String(oldText || '').trim();
+      const next = String(incoming || '');
+      if (!old) return false;
+      if (old.length < 12) return next.trim() === old || next.startsWith(old);
+      return next.includes(old.slice(0, Math.min(80, old.length)));
+    }
+
+    // update_document soll den ganzen alten Inhalt plus den neuen Abschnitt schreiben.
+    // Fehlt der alte Anfang, wird angehängt statt überschrieben.
+    function mergeDocumentUpdate(oldText, incoming) {
+      const old = String(oldText || '').replace(/\s+$/, '');
+      const next = String(incoming || '').replace(/\s+$/, '');
+      if (!old.trim()) return next ? next + '\n' : '';
+      if (!next.trim()) return old + '\n';
+      if (incomingContainsOldHead(old, next)) return next + '\n';
+      return old + '\n\n' + next.trim() + '\n';
+    }
+
+    function requestWriteApproval(items) {
+      return new Promise(resolve => {
+        const root = document.getElementById('write-approval');
+        const list = document.getElementById('write-approval-list');
+        if (!root || !list) {
+          resolve(window.confirm(items.map(i => i.label).join('\n\n') + '\n\nJetzt schreiben?'));
+          return;
+        }
+        list.replaceChildren();
+        for (const it of items) {
+          const li = document.createElement('li');
+          const strong = document.createElement('strong');
+          strong.textContent = it.label;
+          li.appendChild(strong);
+          if (it.preview) {
+            const pre = document.createElement('div');
+            pre.className = 'sheet-preview';
+            pre.textContent = it.preview;
+            li.appendChild(pre);
+          }
+          list.appendChild(li);
+        }
+        root.hidden = false;
+        const okBtn = document.getElementById('write-approve');
+        const noBtn = document.getElementById('write-reject');
+        const finish = (v) => {
+          root.hidden = true;
+          okBtn.onclick = null;
+          noBtn.onclick = null;
+          resolve(v);
+        };
+        okBtn.onclick = () => finish(true);
+        noBtn.onclick = () => finish(false);
+      });
+    }
+
+    async function getVegaDirHandle(root) {
+      const n = ((root && root.name) || '').toLowerCase();
+      if (n === 'vega' || n === 'ai_core') return root;
+      return root.getDirectoryHandle('Vega', { create: true });
+    }
+
+    function isPrivateCoreRel(relPath) {
+      const segs = String(relPath || '').replace(/\\/g, '/').toLowerCase().split('/').filter(Boolean);
+      if (segs.length < 2) return false;
+      if (segs[0] !== 'ai_core' && segs[0] !== 'vega') return false;
+      return ['app', 'appbu', 'native_app', 'native_appbu', 'memory', 'threads', 'output'].includes(segs[1]);
+    }
+
+    async function writeKnowledgeViaFolderHandle(relPath, content) {
+      if (!rootDirHandle) return;
+      const parts = String(relPath || '').split('/').filter(Boolean);
+      const rootName = (rootDirHandle.name || '').toLowerCase();
+      if ((rootName === 'vega' || rootName === 'ai_core') && parts.length && (parts[0].toLowerCase() === 'vega' || parts[0].toLowerCase() === 'ai_core')) {
+        parts.shift();
+      }
+      const fileName = parts.pop();
+      if (!fileName) return;
+      let dir = rootDirHandle;
+      for (const seg of parts) dir = await dir.getDirectoryHandle(seg, { create: true });
+      await writeDiskFile(dir, fileName, content);
     }
 
     async function processToolCalls(rawText) {
       // Entferne eventuelle <think>...</think> Blöcke von Reasoning-Modellen (DeepSeek-R1 / QwQ)
       let cleanText = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+      cleanText = cleanText.replace(/```(?:xml|html|tool|markdown)?\s*(<tool[\s\S]*?(?:<\/tool>|\/>))\s*```/gi, '$1');
       const events = [];
+      const generatedImages = [];
+      const createdDocs = [];
+      const pendingWrites = [];
 
-      const idRegex = /<tool\s+name="set_identity"([^>]*)\/?>/gi;
-      let match;
-      while ((match = idRegex.exec(cleanText)) !== null) {
+      const idMatches = [...cleanText.matchAll(/<tool\s+name="set_identity"([^>]*)\/?>/gi)];
+      for (const match of idMatches) {
         const attrs = match[1];
         const nameMatch = /entity_name="([^"]+)"/i.exec(attrs);
         const roleMatch = /role="([^"]+)"/i.exec(attrs);
@@ -2980,88 +3223,151 @@ ${crossThreadContext}${driveIndexBlock}
         if (nameMatch) {
           state.name = nameMatch[1];
           state.ledger = state.ledger.replace(/\*?\(Noch offen[^)]*\)\*?/i, state.name);
-          document.getElementById('editor-ledger').value = state.ledger;
+          const ledgerEl = document.getElementById('editor-ledger');
+          if (ledgerEl) ledgerEl.value = state.ledger;
         }
         if (roleMatch) state.role = roleMatch[1];
         if (moodMatch) state.mood = moodMatch[1];
         updateIdentityUI();
         events.push(`🪪 Identität aktualisiert: **${state.name}** (${state.mood})`);
-        cleanText = cleanText.replace(match[0], '');
       }
+      cleanText = stripToolMatches(cleanText, idMatches);
 
-      const memRegex = /<tool\s+name="update_memory"[^>]*>([\s\S]*?)<\/tool>/gi;
-      while ((match = memRegex.exec(cleanText)) !== null) {
+      const memMatches = [...cleanText.matchAll(/<tool\s+name=["']update_memory["'][^>]*>([\s\S]*?)<\/tool>/gi)];
+      for (const match of memMatches) {
         const entry = match[1].trim();
-        if (entry) {
-          state.ledger += `\n${entry}`;
-          document.getElementById('editor-ledger').value = state.ledger;
-          events.push(`🧠 Langzeitgedächtnis (\`01_MEMORY_LEDGER.md\`) erweitert.`);
-        }
-        cleanText = cleanText.replace(match[0], '');
+        if (!entry) continue;
+        pendingWrites.push({
+          label: 'Langzeitgedächtnis ergänzen (memory/01_MEMORY_LEDGER.md)',
+          preview: entry.slice(0, 400),
+          apply() {
+            state.ledger += `\n${entry}`;
+            const ledgerEl = document.getElementById('editor-ledger');
+            if (ledgerEl) ledgerEl.value = state.ledger;
+            events.push('🧠 Langzeitgedächtnis (`memory/01_MEMORY_LEDGER.md`) erweitert.');
+          }
+        });
       }
+      cleanText = stripToolMatches(cleanText, memMatches);
 
-      const journalRegex = /<tool\s+name="write_journal"(?:\s+title="([^"]*)")?[^>]*>([\s\S]*?)<\/tool>/gi;
-      while ((match = journalRegex.exec(cleanText)) !== null) {
-        const title = match[1] || 'Reflexion';
-        const content = match[2].trim();
-        const dateStr = new Date().toISOString().slice(0, 10);
-        state.journal += `\n\n### [${dateStr}] ${title}\n${content}`;
-        document.getElementById('editor-journal').value = state.journal;
-        events.push(`📓 Neuer Eintrag im autonomen Journal: *„${title}“*`);
-        cleanText = cleanText.replace(match[0], '');
+      const journalMatches = [...cleanText.matchAll(/<tool\s+name=["']write_journal["']([^>]*)>([\s\S]*?)<\/tool>/gi)];
+      for (const match of journalMatches) {
+        const title = toolAttr(match[1], 'title') || 'Reflexion';
+        const content = (match[2] || '').trim();
+        if (!content) continue;
+        pendingWrites.push({
+          label: 'Journal-Eintrag in memory/02_JOURNAL.md: ' + title,
+          preview: content.slice(0, 400),
+          apply() {
+            const dateStr = new Date().toISOString().slice(0, 10);
+            state.journal += `\n\n### [${dateStr}] ${title}\n${content}`;
+            const journalEl = document.getElementById('editor-journal');
+            if (journalEl) journalEl.value = state.journal;
+            events.push(`📓 Neuer Eintrag in \`memory/02_JOURNAL.md\`: *„${title}“*`);
+          }
+        });
       }
+      cleanText = stripToolMatches(cleanText, journalMatches);
 
-      // Entferne eventuelle Markdown-Codeblöcke rund um <tool ...> Aufrufe
-      cleanText = cleanText.replace(/```(?:xml|html|tool)?\s*(<tool[\s\S]*?(?:<\/tool>|\/>))\s*```/gi, '$1');
+      const docMatches = [...cleanText.matchAll(/<tool\s+name=["']create_document["']([^>]*)>([\s\S]*?)<\/tool>/gi)];
+      for (const match of docMatches) {
+        const filename = toolAttr(match[1], 'filename');
+        const content = (match[2] || '').trim();
+        if (!filename || !content) continue;
+        pendingWrites.push({
+          label: 'Neue Datei: ' + filename,
+          preview: content.slice(0, 400),
+          async apply() {
+            const knowledgeKey = setKnowledgeFile(filename, content);
+            createdDocs.push({ filename: knowledgeKey, content });
+            renderKnowledgeList();
+            if (isNativeBridgeAvailable) {
+              const kn = await saveDirtyKnowledgeToDisk();
+              if (!kn.ok) events.push(`❌ Dokument **${knowledgeKey}** konnte nicht gespeichert werden: ${kn.errors.join('; ')}`);
+              else events.push(`📄 Dokument **${knowledgeKey}** erstellt.`);
+            } else if (rootDirHandle) {
+              try {
+                const vegaHandle = await getVegaDirHandle(rootDirHandle);
+                const outHandle = await vegaHandle.getDirectoryHandle('output', { create: true });
+                await writeDiskFile(outHandle, filename.split('/').pop(), content);
+                events.push(`📄 Dokument **${knowledgeKey}** erstellt.`);
+              } catch (e) {
+                events.push(`📄 **${knowledgeKey}** lokal angelegt, Schreiben in den Ordner ist fehlgeschlagen.`);
+              }
+            } else {
+              events.push(`📄 Dokument **${knowledgeKey}** vorgemerkt (wird geschrieben, sobald Drive verbunden ist).`);
+            }
+          }
+        });
+      }
+      cleanText = stripToolMatches(cleanText, docMatches);
 
-      const imgRegex = /<tool\s+name=["']generate_image["']([^>]*)(?:>([\s\S]*?)<\/tool>|\/>)/gi;
-      const generatedImages = [];
-      while ((match = imgRegex.exec(cleanText)) !== null) {
+      const updMatches = [...cleanText.matchAll(/<tool\s+name=["']update_document["']([^>]*)>([\s\S]*?)<\/tool>/gi)];
+      for (const match of updMatches) {
+        const filename = toolAttr(match[1], 'filename');
+        const content = (match[2] || '').trim();
+        if (!filename || !content) continue;
+        const looked = lookupKnowledge(filename);
+        const merged = mergeDocumentUpdate(looked.text, content);
+        const appended = !!looked.text.trim() && !incomingContainsOldHead(looked.text, content);
+        pendingWrites.push({
+          label: (appended ? 'Anhängen an ' : 'Fortschreiben ') + looked.key,
+          preview: (appended
+            ? 'Der bisherige Inhalt bleibt stehen. Neuer Abschnitt:\n'
+            : 'Voller neuer Inhalt (alter Text plus neuer Abschnitt):\n') + content.slice(0, 400),
+          async apply() {
+            const knowledgeKey = setKnowledgeFile(looked.key, merged);
+            createdDocs.push({ filename: knowledgeKey, content: merged });
+            renderKnowledgeList();
+            if (isNativeBridgeAvailable) {
+              const kn = await saveDirtyKnowledgeToDisk();
+              if (!kn.ok) events.push(`❌ **${knowledgeKey}** nicht gespeichert: ${kn.errors.join('; ')}`);
+              else events.push(`📝 **${knowledgeKey}** fortgeschrieben (bisheriger Inhalt plus neuer Abschnitt).`);
+            } else if (rootDirHandle) {
+              try {
+                await writeKnowledgeViaFolderHandle(knowledgeKey, merged);
+                events.push(`📝 **${knowledgeKey}** im gekoppelten Ordner fortgeschrieben.`);
+              } catch (e) {
+                events.push(`📝 **${knowledgeKey}** vorgemerkt, Schreiben fehlgeschlagen: ${e.message}`);
+              }
+            } else {
+              events.push(`📝 **${knowledgeKey}** vorgemerkt. Mit Google Drive wird die ganze Datei geschrieben.`);
+            }
+          }
+        });
+      }
+      cleanText = stripToolMatches(cleanText, updMatches);
+
+      const imgMatches = [...cleanText.matchAll(/<tool\s+name=["']generate_image["']([^>]*)(?:>([\s\S]*?)<\/tool>|\/>)/gi)];
+      for (const match of imgMatches) {
         const attrs = match[1] || '';
         const bodyPrompt = (match[2] || '').trim();
         const targetMatch = /target=["']([^"']+)["']/i.exec(attrs);
         const attrPromptMatch = /prompt=["']([^"']+)["']/i.exec(attrs);
-
         const target = (targetMatch ? targetMatch[1] : 'chat').toLowerCase();
         const prompt = bodyPrompt || (attrPromptMatch ? attrPromptMatch[1].trim() : '');
-
         if (prompt) {
           const seed = Math.floor(Math.random() * 999999);
           const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=768&model=flux&seed=${seed}&nologo=true`;
           if (target.includes('avatar')) {
             state.avatarUrl = imgUrl;
             updateIdentityUI();
-            events.push(`🎨 Neues Avatar-Porträt generiert und oben links als Profilbild gesetzt.`);
+            events.push('🎨 Neues Avatar-Porträt generiert und oben links als Profilbild gesetzt.');
           } else {
-            events.push(`🎨 Bild generiert (*Flux Engine*).`);
+            events.push('🎨 Bild generiert (*Flux Engine*).');
           }
           generatedImages.push({ url: imgUrl, prompt });
         }
-        cleanText = cleanText.replace(match[0], '');
       }
+      cleanText = stripToolMatches(cleanText, imgMatches);
 
-      const docRegex = /<tool\s+name=["']create_document["']\s+filename=["']([^"']+)["'][^>]*>([\s\S]*?)<\/tool>/gi;
-      const createdDocs = [];
-      while ((match = docRegex.exec(cleanText)) !== null) {
-        const filename = match[1].trim();
-        const content = match[2].trim();
-        const knowledgeKey = setKnowledgeFile(filename, content);
-        createdDocs.push({ filename: knowledgeKey, content });
-        renderKnowledgeList();
-        if (isNativeBridgeAvailable) {
-          const kn = await saveDirtyKnowledgeToDisk();
-          if (!kn.ok) events.push(`❌ Dokument **${knowledgeKey}** konnte nicht gespeichert werden: ${kn.errors.join('; ')}`);
-        } else if (rootDirHandle) {
-          try {
-            let aiCoreHandle = rootDirHandle.name.toLowerCase() === 'ai_core'
-              ? rootDirHandle
-              : await rootDirHandle.getDirectoryHandle('Vega', { create: true });
-            const outHandle = await aiCoreHandle.getDirectoryHandle('output', { create: true });
-            await writeDiskFile(outHandle, filename, content);
-          } catch (e) {}
+      if (pendingWrites.length) {
+        const ok = await requestWriteApproval(pendingWrites);
+        if (ok) {
+          for (const w of pendingWrites) await w.apply();
+        } else {
+          events.push('✋ Schreibaktion nicht freigegeben — nichts ins Gedächtnis, Journal oder in eine Datei geschrieben.');
         }
-        events.push(`📄 Dokument **${knowledgeKey}** erstellt.`);
-        cleanText = cleanText.replace(match[0], '');
       }
 
       saveState();
@@ -3239,21 +3545,20 @@ ${crossThreadContext}${driveIndexBlock}
     // ============================================================================
     function getCleanConversationHistory() {
       const valid = state.messages.filter(m => !m.isWelcome && !m.isError && ((m.content && m.content.trim()) || (m.images && m.images.length > 0)));
+      const recent = valid.slice(-40);
       const cleaned = [];
-      for (const m of valid.slice(-6)) {
+      // Bilder nur aus den letzten Nachrichten, sonst sprengt die Anfrage am Handy.
+      const imageKeepFrom = Math.max(0, recent.length - 3);
+      for (let i = 0; i < recent.length; i++) {
+        const m = recent[i];
         const cappedContent = (m.content || '').slice(0, 2000);
+        const imgs = (i >= imageKeepFrom && m.images && m.images.length > 0) ? [...m.images] : [];
         if (cleaned.length === 0 && m.role !== 'user') continue;
         if (cleaned.length > 0 && cleaned[cleaned.length - 1].role === m.role) {
           cleaned[cleaned.length - 1].content += '\n\n' + cappedContent;
-          if (m.images && m.images.length > 0) {
-            cleaned[cleaned.length - 1].images = [...(cleaned[cleaned.length - 1].images || []), ...m.images];
-          }
+          if (imgs.length) cleaned[cleaned.length - 1].images = [...(cleaned[cleaned.length - 1].images || []), ...imgs];
         } else {
-          cleaned.push({
-            role: m.role,
-            content: cappedContent,
-            images: m.images ? [...m.images] : []
-          });
+          cleaned.push({ role: m.role, content: cappedContent, images: imgs });
         }
       }
       return cleaned;
@@ -3440,7 +3745,7 @@ ${crossThreadContext}${driveIndexBlock}
       const fileContext = buildSmartFileContext();
       const media = await prepareMediaForRequest(provider, modelName);
       const fullSystem = sysPrompt + fileContext + media.textBlock;
-      const history = getCleanConversationHistory().slice(-6);
+      const history = getCleanConversationHistory().slice(-40);
       const hasImagesInHistory = history.some(m => m.images && m.images.length > 0);
 
       // Hilfsfunktion für OpenAI-kompatible Nachrichten (mit oder ohne Vision-Bildern)
@@ -3555,7 +3860,7 @@ ${crossThreadContext}${driveIndexBlock}
       // 4. SOFORT-MODUS (Nur wenn explizit im Dropdown ausgewählt!)
       if (provider === 'pollinations') {
         const compactSystem = `${currentTimeContext || getTimeContextNow()}\n\n${state.axioms.slice(0, 1400)}\nDein Name: ${state.name}\nGedächtnis:\n${state.ledger.slice(0, 900)}`;
-        const shortHistory = history.slice(-5).map(m => ({ role: m.role, content: (m.content || '').slice(0, 1200) }));
+        const shortHistory = history.slice(-40).map(m => ({ role: m.role, content: m.content || '' }));
         const res = await fetchWithTimeout('https://text.pollinations.ai/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -3668,7 +3973,6 @@ ${crossThreadContext}${driveIndexBlock}
           }
 
           cachedGeminiModelIds = testCandidates;
-          const sel = document.getElementById('model-select');
           const geminiGroup = document.getElementById('gemini-optgroup');
           if (geminiGroup) {
             geminiGroup.innerHTML = '';
@@ -3679,20 +3983,12 @@ ${crossThreadContext}${driveIndexBlock}
               geminiGroup.appendChild(opt);
             }
           }
-          const val = `gemini::${workingModel}`;
-          if (![...sel.options].some(o => o.value === val)) {
-            const opt = document.createElement('option');
-            opt.value = val;
-            opt.textContent = `${workingModel} (Google)`;
-            (geminiGroup || sel).prepend(opt);
-          }
-          state.selectedModel = val;
-          sel.value = val;
+          stickSelectedModel();
           saveState();
 
           statusEl.style.background = 'rgba(16,185,129,0.15)';
           statusEl.style.color = 'var(--success)';
-          statusEl.innerHTML = `✅ <strong>Erfolgreich verbunden!</strong> Freigeschaltetes Modell <code>${workingModel}</code> wurde automatisch gefunden und aktiviert. Du kannst das Fenster schließen und loschatten!`;
+          statusEl.innerHTML = `✅ <strong>Erfolgreich verbunden!</strong> Schlüssel gültig (Test mit <code>${workingModel}</code>). Dein gewähltes Modell bleibt.`;
         }
 
         if (provider === 'groq') {
@@ -3745,7 +4041,6 @@ ${crossThreadContext}${driveIndexBlock}
           if (!workingGroqModel) throw new Error(lastGroqErr || 'Keines der Groq-Modelle hat geantwortet.');
 
           // Aktualisiere das Dropdown-Menü mit allen echten Modellen deines Groq-Kontos!
-          const sel = document.getElementById('model-select');
           const firstOptgroup = document.getElementById('groq-optgroup');
           if (firstOptgroup) {
             firstOptgroup.innerHTML = '';
@@ -3757,12 +4052,11 @@ ${crossThreadContext}${driveIndexBlock}
             }
           }
 
-          state.selectedModel = `groq::${workingGroqModel}`;
-          sel.value = state.selectedModel;
+          stickSelectedModel();
           saveState();
           statusEl.style.background = 'rgba(16,185,129,0.15)';
           statusEl.style.color = 'var(--success)';
-          statusEl.innerHTML = `✅ <strong>Groq erfolgreich verbunden!</strong> Modell <code>${workingGroqModel}</code> (sowie ${allGroqModels.length - 1} weitere Modelle deines Kontos) wurden geladen und aktiviert!`;
+          statusEl.innerHTML = `✅ <strong>Groq erfolgreich verbunden!</strong> ${allGroqModels.length} Modelle geladen (Test mit <code>${workingGroqModel}</code>). Dein gewähltes Modell bleibt.`;
         }
 
         if (provider === 'openrouter') {
@@ -3780,12 +4074,11 @@ ${crossThreadContext}${driveIndexBlock}
             }
             throw new Error(msg);
           }
-          state.selectedModel = 'openrouter::openrouter/free';
-          document.getElementById('model-select').value = state.selectedModel;
+          stickSelectedModel();
           saveState();
           statusEl.style.background = 'rgba(16,185,129,0.15)';
           statusEl.style.color = 'var(--success)';
-          statusEl.innerHTML = `✅ <strong>OpenRouter erfolgreich verbunden!</strong> Du kannst das Fenster schließen und loschatten!`;
+          statusEl.innerHTML = `✅ <strong>OpenRouter erfolgreich verbunden!</strong> Dein gewähltes Modell bleibt.`;
         }
       } catch (err) {
         statusEl.style.background = 'rgba(239,68,68,0.15)';
@@ -3954,29 +4247,22 @@ ${crossThreadContext}${driveIndexBlock}
           }
         }
 
-        // Aktionsleiste unter jeder Nachricht (Bearbeiten, Neu generieren, Löschen)
+        // Schmal: nur Kopieren + ⋯. Ab 900px die einzelnen Knöpfe, Löschen abgesetzt.
         if (!msg.isWelcome && editingMessageIndex !== idx) {
           const actionBar = document.createElement('div');
-          actionBar.style.display = 'flex';
-          actionBar.style.gap = '6px';
-          actionBar.style.marginTop = '10px';
-          actionBar.style.paddingTop = '6px';
-          actionBar.style.borderTop = '1px solid rgba(255,255,255,0.06)';
-          actionBar.style.opacity = '0.75';
-
-          if (msg.role === 'user') {
-            actionBar.innerHTML = `
-              <button class="btn btn-sm" style="padding:2px 7px; font-size:0.7rem;" onclick="startEditMessage(${idx})" title="Nachricht bearbeiten und optional neu beantworten lassen">✏️ Bearbeiten</button>
-              <button class="btn btn-sm" style="padding:2px 7px; font-size:0.7rem;" onclick="regenerateFromUserIndex(${idx})" title="Antwort auf diese Nachricht neu generieren">🔄 Antwort neu generieren</button>
-              <button class="btn btn-sm" style="padding:2px 7px; font-size:0.7rem;" onclick="deleteMessageAt(${idx})" title="Nachricht löschen">🗑️</button>
-            `;
-          } else {
-            actionBar.innerHTML = `
-              <button class="btn btn-sm" style="padding:2px 7px; font-size:0.7rem;" onclick="regenerateAssistantMessage(${idx})" title="Diese Antwort noch einmal neu generieren (z.B. auch mit einem anderen Modell)">🔄 Neu generieren</button>
-              <button class="btn btn-sm" style="padding:2px 7px; font-size:0.7rem;" onclick="startEditMessage(${idx})" title="Antworttext manuell anpassen">✏️ Anpassen</button>
-              <button class="btn btn-sm" style="padding:2px 7px; font-size:0.7rem;" onclick="deleteMessageAt(${idx})" title="Nachricht löschen">🗑️</button>
-            `;
-          }
+          actionBar.className = 'msg-actions';
+          const wide = msg.role === 'user'
+            ? `<button type="button" class="msg-act" onclick="startEditMessage(${idx})">Bearbeiten</button>
+               <button type="button" class="msg-act" onclick="regenerateFromUserIndex(${idx})">Antwort neu</button>
+               <button type="button" class="msg-act danger" onclick="deleteMessageAt(${idx})">Löschen</button>`
+            : `<button type="button" class="msg-act" onclick="regenerateAssistantMessage(${idx})">Neu generieren</button>
+               <button type="button" class="msg-act" onclick="startEditMessage(${idx})">Anpassen</button>
+               <button type="button" class="msg-act danger" onclick="deleteMessageAt(${idx})">Löschen</button>`;
+          actionBar.innerHTML = `
+            <button type="button" class="msg-act" onclick="copyMessageAt(${idx}, this)">Kopieren</button>
+            <button type="button" class="msg-act msg-more-btn" onclick="openMsgActionSheet(${idx})" aria-label="Weitere Aktionen">⋯</button>
+            <span class="msg-wide-actions">${wide}</span>
+          `;
           bubble.appendChild(actionBar);
         }
 
@@ -3987,6 +4273,69 @@ ${crossThreadContext}${driveIndexBlock}
 
       if (editingMessageIndex === null) {
         container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function closeMsgActionSheet() {
+      const sheet = document.getElementById('msg-action-sheet');
+      if (sheet) sheet.hidden = true;
+    }
+
+    function openMsgActionSheet(idx) {
+      const msg = state.messages[idx];
+      const box = document.getElementById('msg-action-buttons');
+      const title = document.getElementById('msg-action-title');
+      const sheet = document.getElementById('msg-action-sheet');
+      if (!msg || !box || !sheet) return;
+      title.textContent = msg.role === 'user' ? 'Deine Nachricht' : ('Antwort von ' + (state.name || 'Vega'));
+      box.replaceChildren();
+      const actions = msg.role === 'user'
+        ? [['Bearbeiten', () => startEditMessage(idx)], ['Antwort neu generieren', () => regenerateFromUserIndex(idx)]]
+        : [['Neu generieren', () => regenerateAssistantMessage(idx)], ['Text anpassen', () => startEditMessage(idx)]];
+      for (const [label, fn] of actions) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'sheet-btn';
+        b.textContent = label;
+        b.onclick = () => { closeMsgActionSheet(); fn(); };
+        box.appendChild(b);
+      }
+      const danger = document.createElement('button');
+      danger.type = 'button';
+      danger.className = 'sheet-btn danger';
+      danger.textContent = 'Nachricht löschen';
+      danger.onclick = () => {
+        closeMsgActionSheet();
+        if (confirm('Diese Nachricht wirklich löschen?')) deleteMessageAt(idx);
+      };
+      box.appendChild(danger);
+      sheet.hidden = false;
+    }
+
+    async function copyMessageAt(idx, btn) {
+      const msg = state.messages[idx];
+      const text = (msg && msg.content) || '';
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        if (btn) {
+          const prev = btn.textContent;
+          btn.textContent = 'Kopiert';
+          setTimeout(() => { if (btn.isConnected) btn.textContent = prev; }, 1200);
+        }
+      } catch (e) {
+        alert('Kopieren nicht möglich. Bitte den Text markieren.');
       }
     }
 
@@ -4392,6 +4741,66 @@ ${crossThreadContext}${driveIndexBlock}
       document.getElementById('api-modal').classList.remove('open');
     }
 
+    const IDEENBOX_PATH = 'Vega/knowledge/Vega-Core/Arbeitsplatz/Ideenbox.md';
+
+    function buildIdeenboxPrompt() {
+      const looked = lookupKnowledge(IDEENBOX_PATH);
+      const raw = looked.text || '';
+      const cap = 12000;
+      const clipped = raw.length > cap;
+      const shown = clipped ? raw.slice(0, cap) : raw;
+      const stand = raw.trim()
+        ? (shown + (clipped ? '\n… [gekürzt, die Datei ist länger. Sende dann NUR den neuen Abschnitt ab ## — die App hängt ihn an und ersetzt die Datei nicht.]' : ''))
+        : '(Datei ist leer oder noch nicht geladen. Dann besteht sie nur aus dem neuen Abschnitt.)';
+      return [
+        'Hänge eine Idee an die Ideenbox an. Nicht ins Journal und nicht in eine neue Datei.',
+        '',
+        'Zielpfad, exakt: Vega/knowledge/Vega-Core/Arbeitsplatz/Ideenbox.md',
+        'Werkzeug: update_document. Der Body ist der vollständige neue Dateiinhalt: zuerst der gesamte bisherige Text wörtlich und ungekürzt, danach ein neuer Abschnitt `## [JJJJ-MM-TT] Kurztitel` mit der Idee aus diesem Gespräch.',
+        'Nichts überschreiben, nichts umschreiben, nichts weglassen. create_document dafür nicht benutzen.',
+        '',
+        '<tool name="update_document" filename="Vega/knowledge/Vega-Core/Arbeitsplatz/Ideenbox.md">',
+        '…gesamter alter Inhalt…',
+        '',
+        '## [Datum] Titel',
+        '…neue Idee…',
+        '</tool>',
+        '',
+        'Bisheriger Inhalt:',
+        '--- BEGIN IDEENBOX ---',
+        stand,
+        '--- END IDEENBOX ---',
+        '',
+        'Wenn oben nur ein Auszug steht, schicke NUR den neuen Abschnitt (er beginnt mit ##). Die App hängt ihn an den vorhandenen Inhalt an, statt die Datei zu ersetzen.'
+      ].join('\n');
+    }
+
+    const QUICK_ACTIONS = {
+      weiterdenken: () => 'Denk den letzten Gedanken weiter. Nimm die stärkste offene These aus diesem Gespräch, zieh sie eine Stufe tiefer (Ursache, Folge oder ein Gegenbeispiel) und sag, was du als Nächstes für wahr hältst. Keine bloße Zusammenfassung und noch nichts ins Gedächtnis schreiben.',
+      zusammenfassen: () => 'Fasse unser aktuelles Gespräch knapp zusammen: Entscheidungen, offene Fragen und was sich geändert hat. Keine neuen Thesen. Schreibe nichts ins Gedächtnis und kein Journal, außer ich bitte danach ausdrücklich darum.',
+      klaeren: () => 'In der letzten Nachricht ist etwas unscharf. Benenne die unklaren Stellen, stell die eine entscheidende Rückfrage und schlag eine präzise Lesart vor, mit der wir weiterarbeiten können.',
+      kritik: () => 'Kritisiere die letzte tragende These (meine oder deine) auf Augenhöhe: die schwächste Prämisse, die fehlende Kausalität und was dagegen spricht. Danach ein Satz, was trotzdem trägt.',
+      axiome: () => 'Prüfe, ob das, was wir gerade sagen, zu deinen Grundaxiomen (memory/00_CORE_AXIOMS.md) passt. Nenne konkrete Reibungen oder Bestätigungen. Ändere die Axiome nicht.',
+      journal: () => 'Bitte reflektiere unser aktuelles Gespräch und halte deine eigenen Gedanken und Thesen mit dem Werkzeug write_journal in deinem autonomen Journal (memory/02_JOURNAL.md) fest. Nur den neuen Eintrag, nicht die ganze Datei. Nicht 02_EVOLUTION_JOURNAL.md.',
+      ideenbox: () => buildIdeenboxPrompt(),
+      gedaechtnis: () => 'Bitte fasse die wichtigsten neuen Erkenntnisse unseres aktuellen Gesprächs zusammen und trage sie mit dem Werkzeug update_memory in dein Langzeitgedächtnis (memory/01_MEMORY_LEDGER.md) ein.',
+      thema: () => 'Schlage mir aus deiner eigenen Neugier und unserem bisherigen Gedächtnis heraus ein spannendes Thema, ein Paradoxon oder eine Kausalitätskette vor, die wir als Nächstes vertiefen sollten.',
+      bild: () => 'Generiere bitte mit dem Werkzeug generate_image (target="chat") ein Bild zu folgender Vorstellung: '
+    };
+
+    function applyQuickAction(id) {
+      const build = QUICK_ACTIONS[id];
+      if (!build) return;
+      insertPrompt(build());
+      const sel = document.getElementById('quick-select');
+      if (sel) sel.value = '';
+    }
+
+    function onQuickActionSelect(sel) {
+      if (!sel || !sel.value) return;
+      applyQuickAction(sel.value);
+    }
+
     function insertPrompt(text) {
       const el = document.getElementById('chat-input');
       el.value = text;
@@ -4487,7 +4896,7 @@ ${crossThreadContext}${driveIndexBlock}
   (function () {
     // Service Worker (nur über https bzw. localhost; nicht in der Vega.exe)
     if ('serviceWorker' in navigator && !VegaDrive.isBridgeOrigin && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(e => console.warn('SW:', e)));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=2').catch(e => console.warn('SW:', e)));
     }
 
     // Handy: Seitenleisten als Overlay, Tippen daneben schließt sie
@@ -4507,6 +4916,17 @@ ${crossThreadContext}${driveIndexBlock}
       if (mq.matches && right) right.classList.add('collapsed');
       const obs = new MutationObserver(syncBackdrop);
       ['sidebar', 'threads-sidebar'].forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el, { attributes: true, attributeFilter: ['class'] }); });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      const approval = document.getElementById('write-approval');
+      if (approval && !approval.hidden) {
+        const rejectBtn = document.getElementById('write-reject');
+        if (rejectBtn) rejectBtn.click();
+        return;
+      }
+      if (typeof closeMsgActionSheet === 'function') closeMsgActionSheet();
     });
 
     if (!VegaDrive.active) return;   // Desktop-Exe: ab hier nichts ändern

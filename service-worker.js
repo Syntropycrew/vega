@@ -1,5 +1,6 @@
 // Vega PWA – cacht nur die App-Hülle. API-Aufrufe (Google, Groq, Gemini, OpenRouter, Pollinations) werden NIE gecacht.
-const CACHE = 'vega-shell-v1';
+// shell v2 (2026-11-06): neue Handy-Fassung (Schnell-Dropdown, Journal, Ideenbox).
+const CACHE = 'vega-shell-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
