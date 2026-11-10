@@ -3549,9 +3549,14 @@ ${crossThreadContext}${driveIndexBlock}
       const cleaned = [];
       // Bilder nur aus den letzten Nachrichten, sonst sprengt die Anfrage am Handy.
       const imageKeepFrom = Math.max(0, recent.length - 3);
+      // Nur die aktuelle Nutzernachricht (inkl. Anhang) darf lang sein. Ältere bleiben kurz.
+      let lastUserIdx = -1;
+      for (let j = recent.length - 1; j >= 0; j--) {
+        if (recent[j].role === 'user') { lastUserIdx = j; break; }
+      }
       for (let i = 0; i < recent.length; i++) {
         const m = recent[i];
-        const cappedContent = (m.content || '').slice(0, 2000);
+        const cappedContent = (m.content || '').slice(0, i === lastUserIdx ? 60000 : 2000);
         const imgs = (i >= imageKeepFrom && m.images && m.images.length > 0) ? [...m.images] : [];
         if (cleaned.length === 0 && m.role !== 'user') continue;
         if (cleaned.length > 0 && cleaned[cleaned.length - 1].role === m.role) {
@@ -3598,7 +3603,7 @@ ${crossThreadContext}${driveIndexBlock}
           });
         } else if (att.type === 'file') {
           attachedFileNames.push(att.name);
-          userText += `\n\n--- ANGEHÄNGTE DATEI: ${att.name} ---\n${att.textContent.slice(0, 6000)}`;
+          userText += `\n\n--- ANGEHÄNGTE DATEI: ${att.name} ---\n${att.textContent.slice(0, 60000)}`;
         }
       }
 
@@ -3662,14 +3667,15 @@ ${crossThreadContext}${driveIndexBlock}
       }
     }
 
-    // Kombiniert: 1. Alle im aktuellen Thread per 👁️ aktivierten Dateien + 2. Automatische Stichwort-Treffer in deiner aktuellen Frage (strikt gedeckelt auf max. 3.500 Zeichen gegen Token-Limits!)
+    // Kombiniert: 1. Alle im aktuellen Thread per 👁️ aktivierten Dateien (15.000 Zeichen pro Datei, 40.000 gesamt)
+    // + 2. Automatische Stichwort-Treffer (6.000 Zeichen pro Treffer, 15.000 gesamt, eigenes Budget).
     function buildSmartFileContext() {
       const entries = Object.entries(state.knowledgeFiles || {});
       if (entries.length === 0 && Object.keys(fileMeta).length === 0) return '';
       const activeMap = getActiveThreadKnowledgeMap();
 
       let injected = '';
-      let totalChars = 0;
+      let eyeChars = 0;
       const alreadyIncluded = new Set();
 
       // 1. Vom Nutzer explizit per 👁️ aktivierte Dateien
@@ -3677,10 +3683,10 @@ ${crossThreadContext}${driveIndexBlock}
         if (activeMap[fname]) {
           const meta = fileMeta[fname];
           const cutNote = meta && meta.truncated ? ` (große Datei ${formatBytesDe(meta.size)}, hier nur der Anfang)` : '';
-          const snippet = String(fcontent || '').slice(0, 2000);
-          if (totalChars + snippet.length <= 3600) {
+          const snippet = String(fcontent || '').slice(0, 15000);
+          if (eyeChars + snippet.length <= 40000) {
             injected += `\n--- AKTIVIERTE GOOGLE-DRIVE-DATEI (👁️): ${fname}${cutNote} ---\n${snippet}\n`;
-            totalChars += snippet.length;
+            eyeChars += snippet.length;
             alreadyIncluded.add(fname);
           }
         }
@@ -3694,9 +3700,10 @@ ${crossThreadContext}${driveIndexBlock}
         injected += `\n--- AKTIVIERTE DATEI (👁️): ${path} – ${meta.note || 'nicht lesbar'}${meta.url ? ' Link: ' + meta.url : ''} ---\n`;
       }
 
-      // 2. Gezielte Suche, wenn der Nutzer im Chat nach Drive-Dateien, Ordnern oder Begriffen fragt
+      // 2. Gezielte Suche, wenn der Nutzer im Chat nach Drive-Dateien, Ordnern oder Begriffen fragt.
+      // Eigenes Budget, damit eine lange 👁️-Datei die Treffer nicht verdrängt.
       const lastUserMsg = [...(state.messages || [])].reverse().find(m => m.role === 'user');
-      if (lastUserMsg && lastUserMsg.content && totalChars < 2800) {
+      if (lastUserMsg && lastUserMsg.content) {
         const query = lastUserMsg.content.toLowerCase();
         const keywords = query.split(/[^a-zäöüß0-9]+/).filter(w => w.length >= 4 && !['bitte', 'kannst', 'meinen', 'meinem', 'deinen', 'dieser', 'diesem', 'welche', 'welcher', 'durchsuchen', 'suche', 'google', 'drive', 'ordner', 'datei', 'dateien'].includes(w));
 
@@ -3727,12 +3734,13 @@ ${crossThreadContext}${driveIndexBlock}
         }
 
         scored.sort((a, b) => b.score - a.score);
+        let searchChars = 0;
         for (const item of scored.slice(0, 2)) {
-          const remaining = 3400 - totalChars;
+          const remaining = 15000 - searchChars;
           if (remaining < 300) break;
-          const excerpt = item.textStr.slice(0, Math.min(1600, remaining));
+          const excerpt = item.textStr.slice(0, Math.min(6000, remaining));
           injected += `\n--- AUSZUG AUS GOOGLE-DRIVE-DATEI: ${item.fname} ---\n${excerpt}\n`;
-          totalChars += excerpt.length;
+          searchChars += excerpt.length;
         }
       }
 
@@ -4896,7 +4904,7 @@ ${crossThreadContext}${driveIndexBlock}
   (function () {
     // Service Worker (nur über https bzw. localhost; nicht in der Vega.exe)
     if ('serviceWorker' in navigator && !VegaDrive.isBridgeOrigin && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=2').catch(e => console.warn('SW:', e)));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=3').catch(e => console.warn('SW:', e)));
     }
 
     // Handy: Seitenleisten als Overlay, Tippen daneben schließt sie
