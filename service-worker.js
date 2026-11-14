@@ -1,6 +1,6 @@
 // Vega PWA – cacht nur die App-Hülle. API-Aufrufe (Google, Groq, Gemini, OpenRouter, Pollinations) werden NIE gecacht.
-// shell v3 (2026-11-10): lange Dokumente gehen vollständig an das Modell (aktuelle Nachricht, Augen-Dateien, Auto-Suche).
-const CACHE = 'vega-shell-v3';
+// shell v4 (2026-11-14): Modelllisten-Refresh, search_knowledge, Quick-Actions Desktop-Parität, Fehlertexte 429/402.
+const CACHE = 'vega-shell-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
